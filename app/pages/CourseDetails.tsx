@@ -145,7 +145,7 @@ export default function CourseDetails() {
 
   const handleLessonPlay = (lessonId: string) => {
     console.log("Play lesson:", lessonId);
-    // Video player functionality will be implemented later
+    router.push(`/pages/LessonContent?courseId=${courseId}&lessonId=${lessonId}`);
   };
 
   if (!courseDetail) {
