@@ -1,7 +1,7 @@
 import { ThemedText } from "@/components/ThemedText";
 import { Colors } from "@/constants/Colors";
 import { Ionicons } from "@expo/vector-icons";
-import { useLocalSearchParams, useRouter } from "expo-router";
+import { Stack, useLocalSearchParams, useRouter } from "expo-router";
 import React, { useState } from "react";
 import {
     Alert,
@@ -272,26 +272,31 @@ export default function LessonContent() {
 
   if (!lessonContent) {
     return (
-      <SafeAreaView style={styles.container}>
-        <View style={styles.errorContainer}>
-          <ThemedText style={styles.errorText}>Lesson not found</ThemedText>
-          <TouchableOpacity style={styles.backButton} onPress={handleBack}>
-            <ThemedText style={styles.backButtonText}>Go Back</ThemedText>
-          </TouchableOpacity>
-        </View>
-      </SafeAreaView>
+      <>
+        <Stack.Screen options={{ headerShown: false }} />
+        <SafeAreaView style={styles.container}>
+          <View style={styles.errorContainer}>
+            <ThemedText style={styles.errorText}>Lesson not found</ThemedText>
+            <TouchableOpacity style={styles.backButton} onPress={handleBack}>
+              <ThemedText style={styles.backButtonText}>Go Back</ThemedText>
+            </TouchableOpacity>
+          </View>
+        </SafeAreaView>
+      </>
     );
   }
 
   const currentPageData = lessonContent.pages[currentPage];
 
   return (
-    <SafeAreaView style={styles.container}>
-      <ScrollView
-        style={styles.scrollView}
-        contentContainerStyle={styles.scrollContent}
-        showsVerticalScrollIndicator={false}
-      >
+    <>
+      <Stack.Screen options={{ headerShown: false }} />
+      <SafeAreaView style={styles.container}>
+        <ScrollView
+          style={styles.scrollView}
+          contentContainerStyle={styles.scrollContent}
+          showsVerticalScrollIndicator={false}
+        >
         {/* Header */}
         <View style={styles.header}>
           <TouchableOpacity onPress={handleBack} activeOpacity={0.7}>
@@ -436,6 +441,7 @@ export default function LessonContent() {
         </View>
       </ScrollView>
     </SafeAreaView>
+    </>
   );
 }
 
