@@ -1,0 +1,386 @@
+import { ThemedText } from "@/components/ThemedText";
+import { Colors } from "@/constants/Colors";
+import { Ionicons } from "@expo/vector-icons";
+import { useLocalSearchParams, useRouter } from "expo-router";
+import React from "react";
+import {
+    Dimensions,
+    Image,
+    SafeAreaView,
+    ScrollView,
+    StyleSheet,
+    TouchableOpacity,
+    View,
+} from "react-native";
+
+const { width } = Dimensions.get("window");
+
+// Lesson interface
+interface Lesson {
+  id: string;
+  title: string;
+  number: string;
+  duration?: string;
+}
+
+// Course detail interface
+interface CourseDetail {
+  id: string;
+  title: string;
+  author: string;
+  description: string;
+  lessons: Lesson[];
+  image: any;
+  totalLessons: number;
+  category: string;
+}
+
+// Extended course data with detailed information
+const detailedCourseData: { [key: string]: CourseDetail } = {
+  "1": {
+    id: "1",
+    title: "Python Basics",
+    author: "Tubeguruji",
+    description:
+      "Python is a general-purpose, high-level programming language. Its design philosophy emphasizes code readability with its notable use of significant whitespace.",
+    totalLessons: 15,
+    category: "basic",
+    image: require("@/assets/images/home/course-detail-hero.png"),
+    lessons: [
+      { id: "1", title: "Introduction", number: "01" },
+      { id: "2", title: "Variables", number: "02" },
+      { id: "3", title: "Data Types", number: "03" },
+      { id: "4", title: "Numbers", number: "04" },
+      { id: "5", title: "Casting", number: "05" },
+    ],
+  },
+  "2": {
+    id: "2",
+    title: "React Basics",
+    author: "Tubeguruji",
+    description:
+      "React is a JavaScript library for building user interfaces. It lets you compose complex UIs from small and isolated pieces of code called components.",
+    totalLessons: 15,
+    category: "basic",
+    image: require("@/assets/images/home/course-react.png"),
+    lessons: [
+      { id: "1", title: "Getting Started", number: "01" },
+      { id: "2", title: "Components", number: "02" },
+      { id: "3", title: "Props", number: "03" },
+      { id: "4", title: "State", number: "04" },
+      { id: "5", title: "Hooks", number: "05" },
+    ],
+  },
+  "3": {
+    id: "3",
+    title: "React Native",
+    author: "Tubeguruji",
+    description:
+      "React Native is a framework for building mobile applications using React. Learn to build beautiful, native mobile apps using your existing JavaScript knowledge.",
+    totalLessons: 15,
+    category: "basic",
+    image: require("@/assets/images/home/course-python.png"),
+    lessons: [
+      { id: "1", title: "Setup & Installation", number: "01" },
+      { id: "2", title: "Core Components", number: "02" },
+      { id: "3", title: "Navigation", number: "03" },
+      { id: "4", title: "Styling", number: "04" },
+      { id: "5", title: "API Integration", number: "05" },
+    ],
+  },
+  "4": {
+    id: "4",
+    title: "MySQL",
+    author: "Tubeguruji",
+    description:
+      "MySQL is a popular relational database management system. Learn how to design, create, and manage databases effectively for your applications.",
+    totalLessons: 15,
+    category: "basic",
+    image: require("@/assets/images/home/course-react.png"),
+    lessons: [
+      { id: "1", title: "Database Basics", number: "01" },
+      { id: "2", title: "Creating Tables", number: "02" },
+      { id: "3", title: "SQL Queries", number: "03" },
+      { id: "4", title: "Joins", number: "04" },
+      { id: "5", title: "Optimization", number: "05" },
+    ],
+  },
+};
+
+// Lesson Item Component
+interface LessonItemProps {
+  lesson: Lesson;
+  onPress: () => void;
+}
+
+const LessonItem: React.FC<LessonItemProps> = ({ lesson, onPress }) => (
+  <TouchableOpacity style={styles.lessonItem} onPress={onPress} activeOpacity={0.8}>
+    <View style={styles.lessonNumber}>
+      <ThemedText style={styles.lessonNumberText}>{lesson.number}</ThemedText>
+    </View>
+    <View style={styles.lessonContent}>
+      <ThemedText style={styles.lessonTitle}>{lesson.title}</ThemedText>
+    </View>
+    <TouchableOpacity style={styles.playButton} onPress={onPress}>
+      <Ionicons name="play-circle" size={24} color="#1D92FF" />
+    </TouchableOpacity>
+  </TouchableOpacity>
+);
+
+export default function CourseDetails() {
+  const router = useRouter();
+  const { courseId } = useLocalSearchParams<{ courseId: string }>();
+
+  // Get course details based on courseId
+  const courseDetail = courseId ? detailedCourseData[courseId] : null;
+
+  const handleBack = () => {
+    router.back();
+  };
+
+  const handleMoreOptions = () => {
+    console.log("More options pressed");
+    // More options functionality will be implemented later
+  };
+
+  const handleLessonPlay = (lessonId: string) => {
+    console.log("Play lesson:", lessonId);
+    // Video player functionality will be implemented later
+  };
+
+  if (!courseDetail) {
+    return (
+      <SafeAreaView style={styles.container}>
+        <View style={styles.errorContainer}>
+          <ThemedText style={styles.errorText}>Course not found</ThemedText>
+          <TouchableOpacity style={styles.backButton} onPress={handleBack}>
+            <ThemedText style={styles.backButtonText}>Go Back</ThemedText>
+          </TouchableOpacity>
+        </View>
+      </SafeAreaView>
+    );
+  }
+
+  return (
+    <SafeAreaView style={styles.container}>
+      <ScrollView
+        style={styles.scrollView}
+        contentContainerStyle={styles.scrollContent}
+        showsVerticalScrollIndicator={false}
+      >
+        {/* Header */}
+        <View style={styles.header}>
+          <TouchableOpacity onPress={handleBack} activeOpacity={0.7}>
+            <Ionicons name="arrow-back" size={24} color={Colors.light.text} />
+          </TouchableOpacity>
+          <TouchableOpacity onPress={handleMoreOptions} activeOpacity={0.7}>
+            <Ionicons name="ellipsis-vertical" size={24} color={Colors.light.text} />
+          </TouchableOpacity>
+        </View>
+
+        {/* Course Title and Author */}
+        <View style={styles.titleSection}>
+          <ThemedText style={styles.courseTitle}>{courseDetail.title}</ThemedText>
+          <ThemedText style={styles.courseAuthor}>By {courseDetail.author}</ThemedText>
+        </View>
+
+        {/* Hero Image */}
+        <View style={styles.heroImageContainer}>
+          <Image
+            source={courseDetail.image}
+            style={styles.heroImage}
+            resizeMode="cover"
+          />
+        </View>
+
+        {/* About Course Section */}
+        <View style={styles.aboutSection}>
+          <ThemedText style={styles.sectionTitle}>About Course</ThemedText>
+          <ThemedText style={styles.courseDescription}>
+            {courseDetail.description}
+          </ThemedText>
+        </View>
+
+        {/* Course Content Section */}
+        <View style={styles.courseContentSection}>
+          <ThemedText style={styles.sectionTitle}>Course Content</ThemedText>
+          <View style={styles.lessonsList}>
+            {courseDetail.lessons.map((lesson) => (
+              <LessonItem
+                key={lesson.id}
+                lesson={lesson}
+                onPress={() => handleLessonPlay(lesson.id)}
+              />
+            ))}
+          </View>
+        </View>
+      </ScrollView>
+    </SafeAreaView>
+  );
+}
+
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    backgroundColor: "#F6F8FC",
+  },
+  scrollView: {
+    flex: 1,
+  },
+  scrollContent: {
+    paddingBottom: 20,
+  },
+  header: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    paddingHorizontal: 30,
+    paddingTop: 20,
+    paddingBottom: 15,
+  },
+  titleSection: {
+    paddingHorizontal: 30,
+    marginBottom: 20,
+  },
+  courseTitle: {
+    fontSize: 20,
+    fontWeight: "600",
+    color: Colors.light.text,
+    marginBottom: 5,
+  },
+  courseAuthor: {
+    fontSize: 12,
+    fontWeight: "400",
+    color: Colors.light.text,
+  },
+  heroImageContainer: {
+    paddingHorizontal: 30,
+    marginBottom: 25,
+  },
+  heroImage: {
+    width: "100%",
+    height: (width - 60) * 0.5, // Maintain aspect ratio
+    borderRadius: 10,
+    shadowColor: "#000",
+    shadowOffset: {
+      width: 0,
+      height: 4,
+    },
+    shadowOpacity: 0.25,
+    shadowRadius: 4,
+    elevation: 5,
+  },
+  aboutSection: {
+    paddingHorizontal: 30,
+    marginBottom: 25,
+  },
+  sectionTitle: {
+    fontSize: 16,
+    fontWeight: "700",
+    color: Colors.light.text,
+    marginBottom: 12,
+  },
+  courseDescription: {
+    fontSize: 13,
+    fontWeight: "300",
+    color: Colors.light.text,
+    lineHeight: 20,
+  },
+  courseContentSection: {
+    paddingHorizontal: 30,
+    marginBottom: 25,
+  },
+  lessonsList: {
+    gap: 10,
+  },
+  lessonItem: {
+    flexDirection: "row",
+    alignItems: "center",
+    backgroundColor: Colors.light.background,
+    borderRadius: 5,
+    paddingVertical: 18,
+    paddingHorizontal: 15,
+    shadowColor: "#000",
+    shadowOffset: {
+      width: 0,
+      height: 2,
+    },
+    shadowOpacity: 0.1,
+    shadowRadius: 3,
+    elevation: 3,
+  },
+  lessonNumber: {
+    width: 50,
+    alignItems: "center",
+  },
+  lessonNumberText: {
+    fontSize: 25,
+    fontWeight: "700",
+    color: "rgba(0, 0, 0, 0.29)",
+  },
+  lessonContent: {
+    flex: 1,
+    marginLeft: 10,
+  },
+  lessonTitle: {
+    fontSize: 16,
+    fontWeight: "500",
+    color: Colors.light.text,
+  },
+  playButton: {
+    padding: 5,
+  },
+  relatedCourseSection: {
+    paddingHorizontal: 30,
+    alignItems: "center",
+  },
+  relatedCourseCard: {
+    backgroundColor: Colors.light.background,
+    borderRadius: 5,
+    paddingVertical: 15,
+    paddingHorizontal: 20,
+    alignItems: "center",
+    minWidth: 158,
+    shadowColor: "#000",
+    shadowOffset: {
+      width: 0,
+      height: 2,
+    },
+    shadowOpacity: 0.1,
+    shadowRadius: 3,
+    elevation: 3,
+  },
+  relatedCourseTitle: {
+    fontSize: 12,
+    fontWeight: "700",
+    color: Colors.light.text,
+    marginBottom: 3,
+  },
+  relatedCourseLessons: {
+    fontSize: 9,
+    fontWeight: "300",
+    color: Colors.light.text,
+  },
+  errorContainer: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+    paddingHorizontal: 30,
+  },
+  errorText: {
+    fontSize: 18,
+    fontWeight: "600",
+    color: Colors.light.text,
+    marginBottom: 20,
+  },
+  backButton: {
+    backgroundColor: Colors.light.tint,
+    paddingHorizontal: 20,
+    paddingVertical: 10,
+    borderRadius: 8,
+  },
+  backButtonText: {
+    color: "white",
+    fontWeight: "600",
+  },
+});

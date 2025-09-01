@@ -1,16 +1,17 @@
 import { ThemedText } from "@/components/ThemedText";
 import { Colors } from "@/constants/Colors";
 import { Ionicons } from "@expo/vector-icons";
+import { useRouter } from "expo-router";
 import React, { useState } from "react";
 import {
-    Dimensions,
-    Image,
-    SafeAreaView,
-    ScrollView,
-    StyleSheet,
-    TextInput,
-    TouchableOpacity,
-    View
+  Dimensions,
+  Image,
+  SafeAreaView,
+  ScrollView,
+  StyleSheet,
+  TextInput,
+  TouchableOpacity,
+  View
 } from "react-native";
 
 const { width } = Dimensions.get("window");
@@ -155,6 +156,7 @@ const CollapsibleSection: React.FC<CollapsibleSectionProps> = ({
 };
 
 export default function HomeScreen() {
+  const router = useRouter();
   const [searchQuery, setSearchQuery] = useState("");
   const [isLoading, setIsLoading] = useState(false);
 
@@ -164,7 +166,7 @@ export default function HomeScreen() {
 
   const handleCoursePress = (courseId: string) => {
     console.log("Course pressed:", courseId);
-    // Navigation will be implemented later
+    router.push(`/pages/CourseDetails?courseId=${courseId}`);
   };
 
   const handleProfilePress = () => {
