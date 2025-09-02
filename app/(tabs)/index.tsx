@@ -169,6 +169,11 @@ export default function HomeScreen() {
     router.push(`/pages/CourseDetails?courseId=${courseId}`);
   };
 
+  const handleVideoCoursePress = (courseId: string) => {
+    console.log("Video course pressed:", courseId);
+    router.push(`/pages/VideoCourseDetails?courseId=${courseId}`);
+  };
+
   const handleProfilePress = () => {
     console.log("Profile pressed");
     // Profile navigation will be implemented later
@@ -255,7 +260,7 @@ export default function HomeScreen() {
               <VideoCard
                 key={course.id}
                 course={course}
-                onPress={() => handleCoursePress(course.id)}
+                onPress={() => handleVideoCoursePress(course.id)}
               />
             ))}
           </View>

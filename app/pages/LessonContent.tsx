@@ -1,6 +1,7 @@
 import { ThemedText } from "@/components/ThemedText";
 import { Colors } from "@/constants/Colors";
 import { Ionicons } from "@expo/vector-icons";
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import { Stack, useLocalSearchParams, useRouter } from "expo-router";
 import React, { useState } from "react";
 import {
@@ -219,7 +220,26 @@ export default function LessonContent() {
   const [codeOutput, setCodeOutput] = useState("");
   const [selectedQuizAnswer, setSelectedQuizAnswer] = useState<number | null>(null);
   const [showQuizResult, setShowQuizResult] = useState(false);
+  const [isLessonCompleted, setIsLessonCompleted] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
   
+  // Check lesson completion status on load
+  React.useEffect(() => {
+    const checkCompletionStatus = async () => {
+      if (lessonContent?.id) {
+        try {
+          const completionData = await AsyncStorage.getItem('lesson_completions');
+          const completions = completionData ? JSON.parse(completionData) : {};
+          const completionKey = `${courseId}-${lessonId}`;
+          setIsLessonCompleted(!!completions[completionKey]);
+        } catch (error) {
+          console.error('Error checking lesson completion:', error);
+        }
+      }
+    };
+    checkCompletionStatus();
+  }, [lessonContent, courseId, lessonId]);
+
   // Initialize code input when page changes
   React.useEffect(() => {
     if (lessonContent?.pages[currentPage]?.codeExample) {
@@ -268,6 +288,52 @@ export default function LessonContent() {
   const handleQuizAnswer = (answerIndex: number) => {
     setSelectedQuizAnswer(answerIndex);
     setShowQuizResult(true);
+  };
+
+  const handleFinishLesson = async () => {
+    if (isLoading) return;
+    
+    setIsLoading(true);
+    try {
+      // Get existing completions
+      const completionData = await AsyncStorage.getItem('lesson_completions');
+      const completions = completionData ? JSON.parse(completionData) : {};
+      
+      // Mark this lesson as completed
+      const completionKey = `${courseId}-${lessonId}`;
+      completions[completionKey] = {
+        completed: true,
+        completedAt: new Date().toISOString(),
+        courseId,
+        lessonId,
+      };
+      
+      // Save to AsyncStorage
+      await AsyncStorage.setItem('lesson_completions', JSON.stringify(completions));
+      
+      // Update local state
+      setIsLessonCompleted(true);
+      
+      // Show success message
+      Alert.alert(
+        "Lesson Completed!", 
+        "Great job! You've successfully completed this lesson.",
+        [
+          {
+            text: "Continue",
+            onPress: () => {
+              // Navigate back to course details
+              router.back();
+            }
+          }
+        ]
+      );
+    } catch (error) {
+      console.error('Error saving lesson completion:', error);
+      Alert.alert("Error", "Failed to save lesson completion. Please try again.");
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   if (!lessonContent) {
@@ -439,6 +505,34 @@ export default function LessonContent() {
             </TouchableOpacity>
           )}
         </View>
+
+        {/* Finish Button - Show when on the last page */}
+        {currentPage === lessonContent.totalPages - 1 && (
+          <View style={styles.finishButtonContainer}>
+            {isLessonCompleted ? (
+              <View style={styles.completedIndicator}>
+                <Ionicons name="checkmark-circle" size={24} color="#10B981" />
+                <ThemedText style={styles.completedText}>Lesson Completed!</ThemedText>
+              </View>
+            ) : (
+              <TouchableOpacity 
+                style={[styles.finishButton, isLoading && styles.finishButtonDisabled]} 
+                onPress={handleFinishLesson} 
+                activeOpacity={0.8}
+                disabled={isLoading}
+              >
+                {isLoading ? (
+                  <ThemedText style={styles.finishButtonText}>Saving...</ThemedText>
+                ) : (
+                  <>
+                    <ThemedText style={styles.finishButtonText}>Finish Lesson</ThemedText>
+                    <Ionicons name="checkmark" size={20} color={Colors.light.background} />
+                  </>
+                )}
+              </TouchableOpacity>
+            )}
+          </View>
+        )}
       </ScrollView>
     </SafeAreaView>
     </>
@@ -717,5 +811,56 @@ const styles = StyleSheet.create({
   backButtonText: {
     color: "white",
     fontWeight: "600",
+  },
+  finishButtonContainer: {
+    paddingHorizontal: 24,
+    marginTop: 25,
+    alignItems: "center",
+  },
+  finishButton: {
+    flexDirection: "row",
+    alignItems: "center",
+    backgroundColor: "#10B981",
+    paddingHorizontal: 30,
+    paddingVertical: 15,
+    borderRadius: 12,
+    gap: 8,
+    shadowColor: "#000",
+    shadowOffset: {
+      width: 0,
+      height: 4,
+    },
+    shadowOpacity: 0.15,
+    shadowRadius: 6,
+    elevation: 4,
+    minWidth: 200,
+    justifyContent: "center",
+  },
+  finishButtonDisabled: {
+    backgroundColor: "#9CA3AF",
+    shadowOpacity: 0.05,
+  },
+  finishButtonText: {
+    color: Colors.light.background,
+    fontSize: 18,
+    fontWeight: "700",
+  },
+  completedIndicator: {
+    flexDirection: "row",
+    alignItems: "center",
+    backgroundColor: "#F0FDF4",
+    paddingHorizontal: 30,
+    paddingVertical: 15,
+    borderRadius: 12,
+    gap: 8,
+    borderWidth: 2,
+    borderColor: "#10B981",
+    minWidth: 200,
+    justifyContent: "center",
+  },
+  completedText: {
+    color: "#10B981",
+    fontSize: 18,
+    fontWeight: "700",
   },
 });

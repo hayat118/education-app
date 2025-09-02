@@ -16,37 +16,38 @@ import {
 
 const { width } = Dimensions.get("window");
 
-// Lesson interface
-interface Lesson {
+// Video Lesson interface
+interface VideoLesson {
   id: string;
   title: string;
   number: string;
   duration?: string;
+  isCompleted?: boolean;
 }
 
-// Course detail interface
-interface CourseDetail {
+// Video Course detail interface
+interface VideoCourseDetail {
   id: string;
   title: string;
   author: string;
   description: string;
-  lessons: Lesson[];
-  image: any;
+  lessons: VideoLesson[];
+  bannerImage: any;
   totalLessons: number;
   category: string;
 }
 
-// Extended course data with detailed information
-const detailedCourseData: { [key: string]: CourseDetail } = {
-  "1": {
-    id: "1",
-    title: "Python Basics",
+// Video course data structure based on Figma design
+const videoCourseData: { [key: string]: VideoCourseDetail } = {
+  "v1": {
+    id: "v1",
+    title: "Disney Clone",
     author: "Tubeguruji",
     description:
       "Python is a general-purpose, high-level programming language. Its design philosophy emphasizes code readability with its notable use of significant whitespace.",
-    totalLessons: 15,
-    category: "basic",
-    image: require("@/assets/images/home/course-detail-hero.png"),
+    totalLessons: 5,
+    category: "video",
+    bannerImage: require("@/assets/images/video-courses/video-course-banner.png"),
     lessons: [
       { id: "1", title: "Introduction", number: "01" },
       { id: "2", title: "Variables", number: "02" },
@@ -55,68 +56,17 @@ const detailedCourseData: { [key: string]: CourseDetail } = {
       { id: "5", title: "Casting", number: "05" },
     ],
   },
-  "2": {
-    id: "2",
-    title: "React Basics",
-    author: "Tubeguruji",
-    description:
-      "React is a JavaScript library for building user interfaces. It lets you compose complex UIs from small and isolated pieces of code called components.",
-    totalLessons: 15,
-    category: "basic",
-    image: require("@/assets/images/home/course-react.png"),
-    lessons: [
-      { id: "1", title: "Getting Started", number: "01" },
-      { id: "2", title: "Components", number: "02" },
-      { id: "3", title: "Props", number: "03" },
-      { id: "4", title: "State", number: "04" },
-      { id: "5", title: "Hooks", number: "05" },
-    ],
-  },
-  "3": {
-    id: "3",
-    title: "React Native",
-    author: "Tubeguruji",
-    description:
-      "React Native is a framework for building mobile applications using React. Learn to build beautiful, native mobile apps using your existing JavaScript knowledge.",
-    totalLessons: 15,
-    category: "basic",
-    image: require("@/assets/images/home/course-python.png"),
-    lessons: [
-      { id: "1", title: "Setup & Installation", number: "01" },
-      { id: "2", title: "Core Components", number: "02" },
-      { id: "3", title: "Navigation", number: "03" },
-      { id: "4", title: "Styling", number: "04" },
-      { id: "5", title: "API Integration", number: "05" },
-    ],
-  },
-  "4": {
-    id: "4",
-    title: "MySQL",
-    author: "Tubeguruji",
-    description:
-      "MySQL is a popular relational database management system. Learn how to design, create, and manage databases effectively for your applications.",
-    totalLessons: 15,
-    category: "basic",
-    image: require("@/assets/images/home/course-react.png"),
-    lessons: [
-      { id: "1", title: "Database Basics", number: "01" },
-      { id: "2", title: "Creating Tables", number: "02" },
-      { id: "3", title: "SQL Queries", number: "03" },
-      { id: "4", title: "Joins", number: "04" },
-      { id: "5", title: "Optimization", number: "05" },
-    ],
-  },
 };
 
-// Lesson Item Component
-interface LessonItemProps {
-  lesson: Lesson;
+// Video Lesson Item Component
+interface VideoLessonItemProps {
+  lesson: VideoLesson;
   onPress: () => void;
   isCompleted?: boolean;
   courseId: string;
 }
 
-const LessonItem: React.FC<LessonItemProps> = ({ lesson, onPress, isCompleted = false, courseId }) => (
+const VideoLessonItem: React.FC<VideoLessonItemProps> = ({ lesson, onPress, isCompleted = false, courseId }) => (
   <TouchableOpacity style={styles.lessonItem} onPress={onPress} activeOpacity={0.8}>
     <View style={styles.lessonNumber}>
       <ThemedText style={styles.lessonNumberText}>{lesson.number}</ThemedText>
@@ -127,7 +77,7 @@ const LessonItem: React.FC<LessonItemProps> = ({ lesson, onPress, isCompleted = 
     <View style={styles.lessonActions}>
       {isCompleted && (
         <View style={styles.completedIcon}>
-          <Ionicons name="checkmark-circle" size={20} color="#10B981" />
+          <Ionicons name="checkmark-circle" size={20} color="#0CD650" />
         </View>
       )}
       <TouchableOpacity style={styles.playButton} onPress={onPress}>
@@ -137,13 +87,13 @@ const LessonItem: React.FC<LessonItemProps> = ({ lesson, onPress, isCompleted = 
   </TouchableOpacity>
 );
 
-export default function CourseDetails() {
+export default function VideoCourseDetails() {
   const router = useRouter();
   const { courseId } = useLocalSearchParams<{ courseId: string }>();
   const [completedLessons, setCompletedLessons] = useState<Set<string>>(new Set());
 
-  // Get course details based on courseId
-  const courseDetail = courseId ? detailedCourseData[courseId] : null;
+  // Get video course details based on courseId
+  const courseDetail = courseId ? videoCourseData[courseId] : null;
 
   // Load completed lessons on component mount and when returning from lesson
   const loadCompletedLessons = useCallback(async () => {
@@ -189,8 +139,13 @@ export default function CourseDetails() {
   };
 
   const handleLessonPlay = (lessonId: string) => {
-    console.log("Play lesson:", lessonId);
+    console.log("Play video lesson:", lessonId);
     router.push(`/pages/LessonContent?courseId=${courseId}&lessonId=${lessonId}`);
+  };
+
+  const handleVideoPlay = () => {
+    console.log("Play video course");
+    // Video playback functionality will be implemented later
   };
 
   if (!courseDetail) {
@@ -199,7 +154,7 @@ export default function CourseDetails() {
         <Stack.Screen options={{ headerShown: false }} />
         <SafeAreaView style={styles.container}>
           <View style={styles.errorContainer}>
-            <ThemedText style={styles.errorText}>Course not found</ThemedText>
+            <ThemedText style={styles.errorText}>Video Course not found</ThemedText>
             <TouchableOpacity style={styles.backButton} onPress={handleBack}>
               <ThemedText style={styles.backButtonText}>Go Back</ThemedText>
             </TouchableOpacity>
@@ -234,13 +189,21 @@ export default function CourseDetails() {
           <ThemedText style={styles.courseAuthor}>By {courseDetail.author}</ThemedText>
         </View>
 
-        {/* Hero Image */}
-        <View style={styles.heroImageContainer}>
+        {/* Video Banner with Play Button */}
+        <View style={styles.videoBannerContainer}>
           <Image
-            source={courseDetail.image}
-            style={styles.heroImage}
+            source={courseDetail.bannerImage}
+            style={styles.videoBanner}
             resizeMode="cover"
           />
+          <View style={styles.videoOverlay} />
+          <TouchableOpacity 
+            style={styles.videoPlayButton} 
+            onPress={handleVideoPlay}
+            activeOpacity={0.8}
+          >
+            <Ionicons name="play-circle" size={50} color="rgba(255, 255, 255, 0.9)" />
+          </TouchableOpacity>
         </View>
 
         {/* About Course Section */}
@@ -256,7 +219,7 @@ export default function CourseDetails() {
           <ThemedText style={styles.sectionTitle}>Course Content</ThemedText>
           <View style={styles.lessonsList}>
             {courseDetail.lessons.map((lesson) => (
-              <LessonItem
+              <VideoLessonItem
                 key={lesson.id}
                 lesson={lesson}
                 courseId={courseId || ''}
@@ -306,13 +269,14 @@ const styles = StyleSheet.create({
     fontWeight: "400",
     color: Colors.light.text,
   },
-  heroImageContainer: {
-    paddingHorizontal: 30,
+  videoBannerContainer: {
+    position: "relative",
+    paddingHorizontal: 28,
     marginBottom: 25,
   },
-  heroImage: {
+  videoBanner: {
     width: "100%",
-    height: (width - 60) * 0.5, // Maintain aspect ratio
+    height: (width - 56) * 0.527, // Maintain aspect ratio based on design
     borderRadius: 10,
     shadowColor: "#000",
     shadowOffset: {
@@ -322,6 +286,23 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.25,
     shadowRadius: 4,
     elevation: 5,
+  },
+  videoOverlay: {
+    position: "absolute",
+    top: 0,
+    left: 28,
+    right: 28,
+    bottom: 0,
+    backgroundColor: "rgba(23, 22, 22, 0.26)",
+    borderRadius: 10,
+  },
+  videoPlayButton: {
+    position: "absolute",
+    top: "50%",
+    left: "50%",
+    marginTop: -25,
+    marginLeft: -25,
+    zIndex: 1,
   },
   aboutSection: {
     paddingHorizontal: 30,
@@ -390,37 +371,6 @@ const styles = StyleSheet.create({
   },
   playButton: {
     padding: 5,
-  },
-  relatedCourseSection: {
-    paddingHorizontal: 30,
-    alignItems: "center",
-  },
-  relatedCourseCard: {
-    backgroundColor: Colors.light.background,
-    borderRadius: 5,
-    paddingVertical: 15,
-    paddingHorizontal: 20,
-    alignItems: "center",
-    minWidth: 158,
-    shadowColor: "#000",
-    shadowOffset: {
-      width: 0,
-      height: 2,
-    },
-    shadowOpacity: 0.1,
-    shadowRadius: 3,
-    elevation: 3,
-  },
-  relatedCourseTitle: {
-    fontSize: 12,
-    fontWeight: "700",
-    color: Colors.light.text,
-    marginBottom: 3,
-  },
-  relatedCourseLessons: {
-    fontSize: 9,
-    fontWeight: "300",
-    color: Colors.light.text,
   },
   errorContainer: {
     flex: 1,
