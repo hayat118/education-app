@@ -176,7 +176,7 @@ export default function HomeScreen() {
 
   const handleProfilePress = () => {
     console.log("Profile pressed");
-    // Profile navigation will be implemented later
+    router.push("/pages/UserProfile");
   };
 
   const renderCourseGrid = (courses: Course[]) => {

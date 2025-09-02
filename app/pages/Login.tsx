@@ -1,7 +1,10 @@
 import { ThemedText } from "@/components/ThemedText";
 import { Colors } from "@/constants/Colors";
+import { Ionicons } from "@expo/vector-icons";
+import { useRouter } from "expo-router";
 import React, { useState } from "react";
 import {
+  Alert,
   Dimensions,
   Image,
   KeyboardAvoidingView,
@@ -18,21 +21,111 @@ import {
 const { width, height } = Dimensions.get("window");
 
 export default function Login() {
+  const router = useRouter();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [isPasswordVisible, setIsPasswordVisible] = useState(false);
+  const [emailError, setEmailError] = useState("");
+  const [passwordError, setPasswordError] = useState("");
+  const [isLoading, setIsLoading] = useState(false);
 
-  const handleLogin = () => {
-    // Add login logic here
-    console.log("Login pressed with:", { email, password });
+  // Email validation
+  const validateEmail = (email: string) => {
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    return emailRegex.test(email);
+  };
+
+  // Password validation
+  const validatePassword = (password: string) => {
+    return password.length >= 6;
+  };
+
+  const handleEmailChange = (text: string) => {
+    setEmail(text);
+    if (emailError) {
+      setEmailError("");
+    }
+  };
+
+  const handlePasswordChange = (text: string) => {
+    setPassword(text);
+    if (passwordError) {
+      setPasswordError("");
+    }
+  };
+
+  const handleLogin = async () => {
+    // Reset errors
+    setEmailError("");
+    setPasswordError("");
+
+    // Validate inputs
+    let hasError = false;
+
+    if (!email.trim()) {
+      setEmailError("Email is required");
+      hasError = true;
+    } else if (!validateEmail(email)) {
+      setEmailError("Please enter a valid email address");
+      hasError = true;
+    }
+
+    if (!password.trim()) {
+      setPasswordError("Password is required");
+      hasError = true;
+    } else if (!validatePassword(password)) {
+      setPasswordError("Password must be at least 6 characters");
+      hasError = true;
+    }
+
+    if (hasError) return;
+
+    setIsLoading(true);
+    
+    try {
+      // Simulate login process
+      await new Promise(resolve => setTimeout(resolve, 1500));
+      
+      // For demo purposes, navigate to home on successful login
+      Alert.alert(
+        "Login Successful!",
+        "Welcome to your learning journey!",
+        [
+          {
+            text: "Continue",
+            onPress: () => router.push("/(tabs)"),
+          },
+        ]
+      );
+    } catch (error) {
+      Alert.alert("Login Failed", "Please check your credentials and try again.");
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   const handleForgotPassword = () => {
-    console.log("Forgot password pressed");
+    Alert.alert(
+      "Forgot Password",
+      "Password reset functionality will be implemented soon.",
+      [{ text: "OK" }]
+    );
   };
 
   const handleSignUp = () => {
-    console.log("Sign up pressed");
+    Alert.alert(
+      "Sign Up",
+      "Registration functionality will be implemented soon.",
+      [{ text: "OK" }]
+    );
+  };
+
+  const handleSocialLogin = (provider: string) => {
+    Alert.alert(
+      `${provider} Login`,
+      `${provider} authentication will be implemented soon.`,
+      [{ text: "OK" }]
+    );
   };
 
   return (
@@ -69,41 +162,66 @@ export default function Login() {
             {/* Email Input */}
             <View style={styles.inputContainer}>
               <ThemedText style={styles.inputLabel}>Email</ThemedText>
-              <TextInput
-                style={styles.textInput}
-                placeholder="Enter your email"
-                placeholderTextColor={Colors.light.icon}
-                value={email}
-                onChangeText={setEmail}
-                keyboardType="email-address"
-                autoCapitalize="none"
-                autoCorrect={false}
-              />
+              <View style={[styles.inputWrapper, emailError && styles.inputError]}>
+                <Ionicons 
+                  name="mail-outline" 
+                  size={20} 
+                  color={emailError ? "#EF4444" : Colors.light.icon} 
+                  style={styles.inputIcon}
+                />
+                <TextInput
+                  style={[styles.textInput, styles.textInputWithIcon]}
+                  placeholder="Enter your email"
+                  placeholderTextColor={Colors.light.icon}
+                  value={email}
+                  onChangeText={handleEmailChange}
+                  keyboardType="email-address"
+                  autoCapitalize="none"
+                  autoCorrect={false}
+                  editable={!isLoading}
+                />
+              </View>
+              {emailError ? (
+                <ThemedText style={styles.errorText}>{emailError}</ThemedText>
+              ) : null}
             </View>
 
             {/* Password Input */}
             <View style={styles.inputContainer}>
               <ThemedText style={styles.inputLabel}>Password</ThemedText>
-              <View style={styles.passwordContainer}>
+              <View style={[styles.inputWrapper, passwordError && styles.inputError]}>
+                <Ionicons 
+                  name="lock-closed-outline" 
+                  size={20} 
+                  color={passwordError ? "#EF4444" : Colors.light.icon} 
+                  style={styles.inputIcon}
+                />
                 <TextInput
-                  style={[styles.textInput, styles.passwordInput]}
+                  style={[styles.textInput, styles.textInputWithIcon, styles.passwordInput]}
                   placeholder="Enter your password"
                   placeholderTextColor={Colors.light.icon}
                   value={password}
-                  onChangeText={setPassword}
+                  onChangeText={handlePasswordChange}
                   secureTextEntry={!isPasswordVisible}
                   autoCapitalize="none"
                   autoCorrect={false}
+                  editable={!isLoading}
                 />
                 <TouchableOpacity
                   style={styles.eyeButton}
                   onPress={() => setIsPasswordVisible(!isPasswordVisible)}
+                  activeOpacity={0.7}
                 >
-                  <Text style={styles.eyeText}>
-                    {isPasswordVisible ? "👁️" : "👁️‍🗨️"}
-                  </Text>
+                  <Ionicons 
+                    name={isPasswordVisible ? "eye-outline" : "eye-off-outline"} 
+                    size={20} 
+                    color={Colors.light.icon}
+                  />
                 </TouchableOpacity>
               </View>
+              {passwordError ? (
+                <ThemedText style={styles.errorText}>{passwordError}</ThemedText>
+              ) : null}
             </View>
 
             {/* Forgot Password */}
@@ -117,8 +235,19 @@ export default function Login() {
             </TouchableOpacity>
 
             {/* Login Button */}
-            <TouchableOpacity style={styles.loginButton} onPress={handleLogin}>
-              <Text style={styles.loginButtonText}>Sign In</Text>
+            <TouchableOpacity 
+              style={[styles.loginButton, isLoading && styles.loginButtonDisabled]} 
+              onPress={handleLogin}
+              disabled={isLoading}
+              activeOpacity={0.8}
+            >
+              {isLoading ? (
+                <View style={styles.loadingContainer}>
+                  <ThemedText style={styles.loginButtonText}>Signing In...</ThemedText>
+                </View>
+              ) : (
+                <Text style={styles.loginButtonText}>Sign In</Text>
+              )}
             </TouchableOpacity>
 
             {/* Divider */}
@@ -130,11 +259,21 @@ export default function Login() {
 
             {/* Social Login Buttons */}
             <View style={styles.socialContainer}>
-              <TouchableOpacity style={styles.socialButton}>
-                <Text style={styles.socialButtonText}>📧 Google</Text>
+              <TouchableOpacity 
+                style={styles.socialButton}
+                onPress={() => handleSocialLogin("Google")}
+                activeOpacity={0.8}
+              >
+                <Ionicons name="logo-google" size={20} color="#4285F4" style={styles.socialIcon} />
+                <Text style={styles.socialButtonText}>Google</Text>
               </TouchableOpacity>
-              <TouchableOpacity style={styles.socialButton}>
-                <Text style={styles.socialButtonText}>📱 Apple</Text>
+              <TouchableOpacity 
+                style={styles.socialButton}
+                onPress={() => handleSocialLogin("Apple")}
+                activeOpacity={0.8}
+              >
+                <Ionicons name="logo-apple" size={20} color="#000000" style={styles.socialIcon} />
+                <Text style={styles.socialButtonText}>Apple</Text>
               </TouchableOpacity>
             </View>
 
@@ -217,30 +356,44 @@ const styles = StyleSheet.create({
     marginBottom: 8,
     color: Colors.light.text,
   },
-  textInput: {
+  inputWrapper: {
+    flexDirection: "row",
+    alignItems: "center",
     borderWidth: 2,
     borderColor: "#E5E7EB",
     borderRadius: 12,
+    backgroundColor: "#F9FAFB",
     paddingHorizontal: 16,
+  },
+  inputError: {
+    borderColor: "#EF4444",
+    backgroundColor: "#FEF2F2",
+  },
+  inputIcon: {
+    marginRight: 12,
+  },
+  textInput: {
+    flex: 1,
     paddingVertical: 14,
     fontSize: 16,
-    backgroundColor: "#F9FAFB",
     color: Colors.light.text,
   },
-  passwordContainer: {
-    position: "relative",
+  textInputWithIcon: {
+    paddingLeft: 0,
+  },
+  errorText: {
+    fontSize: 14,
+    color: "#EF4444",
+    marginTop: 4,
+    marginLeft: 4,
   },
   passwordInput: {
-    paddingRight: 50,
+    paddingRight: 40,
   },
   eyeButton: {
     position: "absolute",
     right: 16,
-    top: 14,
     padding: 4,
-  },
-  eyeText: {
-    fontSize: 20,
   },
   forgotPasswordContainer: {
     alignItems: "flex-end",
@@ -264,10 +417,18 @@ const styles = StyleSheet.create({
     shadowRadius: 8,
     elevation: 8,
   },
+  loginButtonDisabled: {
+    backgroundColor: "#9CA3AF",
+    shadowOpacity: 0.1,
+  },
   loginButtonText: {
     color: "white",
     fontSize: 18,
     fontWeight: "bold",
+  },
+  loadingContainer: {
+    flexDirection: "row",
+    alignItems: "center",
   },
   dividerContainer: {
     flexDirection: "row",
@@ -292,12 +453,25 @@ const styles = StyleSheet.create({
   },
   socialButton: {
     flex: 1,
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
     borderWidth: 2,
     borderColor: "#E5E7EB",
     borderRadius: 12,
     paddingVertical: 14,
-    alignItems: "center",
     backgroundColor: "#FFFFFF",
+    shadowColor: "#000",
+    shadowOffset: {
+      width: 0,
+      height: 2,
+    },
+    shadowOpacity: 0.05,
+    shadowRadius: 3,
+    elevation: 2,
+  },
+  socialIcon: {
+    marginRight: 8,
   },
   socialButtonText: {
     fontSize: 16,
