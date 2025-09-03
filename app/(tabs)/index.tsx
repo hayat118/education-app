@@ -164,6 +164,24 @@ export default function HomeScreen() {
     setSearchQuery(text);
   };
 
+  // Filter courses based on search query
+  const filteredCourseData = courseData.filter(course =>
+    course.title.toLowerCase().includes(searchQuery.toLowerCase())
+  );
+
+  // Filter video courses based on search query
+  const filteredVideoCoursesData = videoCoursesData.filter(course =>
+    course.title.toLowerCase().includes(searchQuery.toLowerCase())
+  );
+
+  // Check if there are any search results
+  const hasSearchResults = searchQuery.length > 0 && 
+    (filteredCourseData.length > 0 || filteredVideoCoursesData.length > 0);
+  
+  // Check if search is active but no results found
+  const isSearchActiveWithNoResults = searchQuery.length > 0 && 
+    filteredCourseData.length === 0 && filteredVideoCoursesData.length === 0;
+
   const handleCoursePress = (courseId: string) => {
     console.log("Course pressed:", courseId);
     router.push(`/pages/CourseDetails?courseId=${courseId}`);
@@ -236,45 +254,101 @@ export default function HomeScreen() {
             />
             <TextInput
               style={styles.searchInput}
-              placeholder="Search"
+              placeholder="Search courses..."
               placeholderTextColor={Colors.light.icon}
               value={searchQuery}
               onChangeText={handleSearch}
+              autoCapitalize="none"
+              autoCorrect={false}
+            />
+            {searchQuery.length > 0 && (
+              <TouchableOpacity
+                style={styles.clearButton}
+                onPress={() => setSearchQuery("")}
+                activeOpacity={0.7}
+              >
+                <Ionicons
+                  name="close-circle"
+                  size={20}
+                  color={Colors.light.icon}
+                />
+              </TouchableOpacity>
+            )}
+          </View>
+        </View>
+
+        {/* Hero Banner - Hide when searching */}
+        {searchQuery.length === 0 && (
+          <View style={styles.heroBannerContainer}>
+            <Image
+              source={require("@/assets/images/home/hero-banner.png")}
+              style={styles.heroBanner}
+              resizeMode="cover"
             />
           </View>
-        </View>
+        )}
 
-        {/* Hero Banner */}
-        <View style={styles.heroBannerContainer}>
-          <Image
-            source={require("@/assets/images/home/hero-banner.png")}
-            style={styles.heroBanner}
-            resizeMode="cover"
-          />
-        </View>
-
-        {/* Video Courses Section */}
-        <CollapsibleSection title="Video Course">
-          <View style={styles.videoCoursesContainer}>
-            {videoCoursesData.map((course) => (
-              <VideoCard
-                key={course.id}
-                course={course}
-                onPress={() => handleVideoCoursePress(course.id)}
-              />
-            ))}
+        {/* Search Results */}
+        {searchQuery.length > 0 && (
+          <View style={styles.searchResultsContainer}>
+            <ThemedText style={styles.searchResultsTitle}>
+              {isSearchActiveWithNoResults 
+                ? `No results found for "${searchQuery}"`
+                : `Search results for "${searchQuery}"`
+              }
+            </ThemedText>
+            
+            {/* Video Course Results */}
+            {filteredVideoCoursesData.length > 0 && (
+              <CollapsibleSection title={`Video Courses (${filteredVideoCoursesData.length})`} defaultExpanded={true}>
+                <View style={styles.videoCoursesContainer}>
+                  {filteredVideoCoursesData.map((course) => (
+                    <VideoCard
+                      key={course.id}
+                      course={course}
+                      onPress={() => handleVideoCoursePress(course.id)}
+                    />
+                  ))}
+                </View>
+              </CollapsibleSection>
+            )}
+            
+            {/* Regular Course Results */}
+            {filteredCourseData.length > 0 && (
+              <CollapsibleSection title={`Courses (${filteredCourseData.length})`} defaultExpanded={true}>
+                {renderCourseGrid(filteredCourseData)}
+              </CollapsibleSection>
+            )}
           </View>
-        </CollapsibleSection>
+        )}
 
-        {/* Basic Popular Courses Section */}
-        <CollapsibleSection title="Basic Popular Course">
-          {renderCourseGrid(courseData.filter((course) => course.category === "basic"))}
-        </CollapsibleSection>
+        {/* Default Sections - Show when not searching */}
+        {searchQuery.length === 0 && (
+          <>
+            {/* Video Courses Section */}
+            <CollapsibleSection title="Video Course">
+              <View style={styles.videoCoursesContainer}>
+                {videoCoursesData.map((course) => (
+                  <VideoCard
+                    key={course.id}
+                    course={course}
+                    onPress={() => handleVideoCoursePress(course.id)}
+                  />
+                ))}
+              </View>
+            </CollapsibleSection>
 
-        {/* Advanced Courses Section */}
-        <CollapsibleSection title="Advance Courses">
-          {renderCourseGrid(courseData.filter((course) => course.category === "advanced"))}
-        </CollapsibleSection>
+            {/* Basic Popular Courses Section */}
+            <CollapsibleSection title="Basic Popular Course">
+              {renderCourseGrid(courseData.filter((course) => course.category === "basic"))}
+            </CollapsibleSection>
+
+            {/* Advanced Courses Section */}
+            <CollapsibleSection title="Advance Courses">
+              {renderCourseGrid(courseData.filter((course) => course.category === "advanced"))}
+            </CollapsibleSection>
+          </>
+        )}
       </ScrollView>
     </SafeAreaView>
   );
@@ -342,10 +416,25 @@ const styles = StyleSheet.create({
   searchIcon: {
     marginRight: 12,
   },
+  clearButton: {
+    marginLeft: 8,
+    padding: 2,
+  },
   searchInput: {
     flex: 1,
     fontSize: 16,
     color: Colors.light.text,
+  },
+  searchResultsContainer: {
+    paddingHorizontal: 30,
+    marginBottom: 20,
+  },
+  searchResultsTitle: {
+    fontSize: 18,
+    fontWeight: "600",
+    color: Colors.light.text,
+    marginBottom: 20,
+    textAlign: "center",
   },
   heroBannerContainer: {
     paddingHorizontal: 30,
