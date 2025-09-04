@@ -155,7 +155,7 @@ export default function UserProfile() {
   const handleLogout = () => {
     Alert.alert(
       "Logout",
-      "Are you sure you want to logout?",
+      "Are you sure you want to logout? You will need to sign in again to access the app.",
       [
         {
           text: "Cancel",
@@ -164,9 +164,48 @@ export default function UserProfile() {
         {
           text: "Logout",
           style: "destructive",
-          onPress: () => {
-            // Clear any user session data if needed
-            router.replace("/pages/Login");
+          onPress: async () => {
+            try {
+              // Clear all user session data
+              await AsyncStorage.multiRemove([
+                'user_session',
+                'user_token',
+                'auto_login',
+                'user_preferences'
+              ]);
+              
+              // Show logout success message
+              Alert.alert(
+                "Logged Out",
+                "You have been successfully logged out. Please sign in to continue.",
+                [
+                  {
+                    text: "OK",
+                    onPress: () => {
+                      // Replace with login screen - user cannot go back
+                      router.replace("/pages/Login");
+                    }
+                  }
+                ]
+              );
+            } catch (error) {
+              console.error('Error during logout:', error);
+              Alert.alert(
+                "Logout Error",
+                "There was an error logging out. Please try again.",
+                [
+                  {
+                    text: "Retry",
+                    onPress: handleLogout
+                  },
+                  {
+                    text: "Force Logout",
+                    style: "destructive",
+                    onPress: () => router.replace("/pages/Login")
+                  }
+                ]
+              );
+            }
           },
         },
       ]

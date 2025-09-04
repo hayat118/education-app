@@ -1,8 +1,9 @@
 import { ThemedText } from "@/components/ThemedText";
 import { Colors } from "@/constants/Colors";
 import { Ionicons } from "@expo/vector-icons";
-import { useRouter } from "expo-router";
-import React, { useState } from "react";
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import { useFocusEffect, useRouter } from "expo-router";
+import React, { useCallback, useState } from "react";
 import {
   Dimensions,
   Image,
@@ -159,6 +160,54 @@ export default function HomeScreen() {
   const router = useRouter();
   const [searchQuery, setSearchQuery] = useState("");
   const [isLoading, setIsLoading] = useState(false);
+  const [isCheckingAuth, setIsCheckingAuth] = useState(true);
+
+  // Check authentication status when screen comes into focus
+  const checkAuthStatus = useCallback(async () => {
+    try {
+      const userToken = await AsyncStorage.getItem('user_token');
+      const userSession = await AsyncStorage.getItem('user_session');
+      
+      if (!userToken || !userSession) {
+        // No valid session, redirect to login
+        router.replace('/pages/Login');
+        return;
+      }
+      
+      // Parse and validate session
+      const session = JSON.parse(userSession);
+      if (!session.isAuthenticated) {
+        // Invalid session, redirect to login
+        router.replace('/pages/Login');
+        return;
+      }
+      
+      // Valid session, allow access
+      setIsCheckingAuth(false);
+    } catch (error) {
+      console.error('Error checking auth status:', error);
+      // On error, redirect to login for safety
+      router.replace('/pages/Login');
+    }
+  }, [router]);
+
+  // Check auth on screen focus
+  useFocusEffect(
+    useCallback(() => {
+      checkAuthStatus();
+    }, [checkAuthStatus])
+  );
+
+  // Show loading while checking authentication
+  if (isCheckingAuth) {
+    return (
+      <SafeAreaView style={styles.container}>
+        <View style={styles.loadingContainer}>
+          <ThemedText style={styles.loadingText}>Checking authentication...</ThemedText>
+        </View>
+      </SafeAreaView>
+    );
+  }
 
   const handleSearch = (text: string) => {
     setSearchQuery(text);
@@ -556,5 +605,17 @@ const styles = StyleSheet.create({
     backgroundColor: "#E1E5E9",
     borderRadius: 4,
     width: "60%",
+  },
+  // Loading Styles
+  loadingContainer: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+    backgroundColor: "#F6F8FC",
+  },
+  loadingText: {
+    fontSize: 16,
+    fontWeight: "500",
+    color: Colors.light.text,
   },
 });

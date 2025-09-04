@@ -19,6 +19,7 @@ const MAPPING = {
   'person.fill': 'person',
   'chevron.left.forwardslash.chevron.right': 'code',
   'chevron.right': 'chevron-right',
+  'doc.text.fill': 'assignment',
 } as IconMapping;
 
 /**

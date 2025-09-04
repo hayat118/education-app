@@ -1,6 +1,7 @@
 import { ThemedText } from "@/components/ThemedText";
 import { Colors } from "@/constants/Colors";
 import { Ionicons } from "@expo/vector-icons";
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useRouter } from "expo-router";
 import React, { useState } from "react";
 import {
@@ -86,14 +87,31 @@ export default function Login() {
       // Simulate login process
       await new Promise(resolve => setTimeout(resolve, 1500));
       
-      // For demo purposes, navigate to home on successful login
+      // Store authentication data
+      const authData = {
+        user_token: 'demo_auth_token_' + Date.now(),
+        user_session: {
+          email: email,
+          loginTime: new Date().toISOString(),
+          isAuthenticated: true
+        },
+        auto_login: true
+      };
+      
+      await AsyncStorage.multiSet([
+        ['user_token', authData.user_token],
+        ['user_session', JSON.stringify(authData.user_session)],
+        ['auto_login', 'true']
+      ]);
+      
+      // Navigate to home on successful login
       Alert.alert(
         "Login Successful!",
         "Welcome to your learning journey!",
         [
           {
             text: "Continue",
-            onPress: () => router.push("/(tabs)"),
+            onPress: () => router.replace("/(tabs)"),
           },
         ]
       );
