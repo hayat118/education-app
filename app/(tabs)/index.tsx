@@ -382,6 +382,7 @@ const styles = StyleSheet.create({
     fontWeight: "400",
     color: Colors.light.text,
     marginBottom: 4,
+    marginTop:30,
   },
   userName: {
     fontSize: 14,

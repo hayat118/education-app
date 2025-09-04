@@ -221,7 +221,7 @@ export default function CourseDetails() {
         {/* Header */}
         <View style={styles.header}>
           <TouchableOpacity onPress={handleBack} activeOpacity={0.7}>
-            <Ionicons name="arrow-back" size={24} color={Colors.light.text} />
+            <Ionicons name="arrow-back" size={24} style={{marginTop:20}} color={Colors.light.text} />
           </TouchableOpacity>
           <TouchableOpacity onPress={handleMoreOptions} activeOpacity={0.7}>
             <Ionicons name="ellipsis-vertical" size={24} color={Colors.light.text} />
