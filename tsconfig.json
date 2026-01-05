@@ -3,6 +3,8 @@
   "compilerOptions": {
     "forceConsistentCasingInFileNames": true,
     "strict": true,
+    "jsx": "react-native",
+    "moduleResolution": "bundler",
     "paths": {
       "@/*": ["./*"]
     }
