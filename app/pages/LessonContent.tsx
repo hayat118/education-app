@@ -1,5 +1,6 @@
 import { ThemedText } from "@/components/ThemedText";
 import { Colors } from "@/constants/Colors";
+import courseService from '@/services/courseService';
 import { Ionicons } from "@expo/vector-icons";
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { Stack, useLocalSearchParams, useRouter } from "expo-router";
@@ -310,6 +311,21 @@ export default function LessonContent() {
       
       // Save to AsyncStorage
       await AsyncStorage.setItem('lesson_completions', JSON.stringify(completions));
+      
+      // Update backend progress if authenticated
+      try {
+        const isAuthenticated = await AsyncStorage.getItem('auth_token');
+        if (isAuthenticated && lessonContent?.id) {
+          // Extract lesson ID from lessonContent.id (format: "courseId-lessonId")
+          const [, apiLessonId] = lessonContent.id.split('-');
+          if (apiLessonId) {
+            await courseService.updateLessonProgress(courseId, parseInt(apiLessonId), true);
+          }
+        }
+      } catch (apiError) {
+        console.warn('Failed to update backend progress:', apiError);
+        // Continue even if backend update fails
+      }
       
       // Update local state
       setIsLessonCompleted(true);

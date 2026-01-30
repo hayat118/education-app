@@ -1,17 +1,19 @@
 import { ThemedText } from "@/components/ThemedText";
 import { Colors } from "@/constants/Colors";
+import { Lesson as ApiLesson, Course } from '@/services/apiConfig';
+import courseService from '@/services/courseService';
 import { Ionicons } from "@expo/vector-icons";
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { Stack, useFocusEffect, useLocalSearchParams, useRouter } from "expo-router";
 import React, { useCallback, useEffect, useState } from "react";
 import {
-    Dimensions,
-    Image,
-    SafeAreaView,
-    ScrollView,
-    StyleSheet,
-    TouchableOpacity,
-    View,
+  Dimensions,
+  Image,
+  SafeAreaView,
+  ScrollView,
+  StyleSheet,
+  TouchableOpacity,
+  View,
 } from "react-native";
 
 const { width } = Dimensions.get("window");
@@ -22,90 +24,27 @@ interface Lesson {
   title: string;
   number: string;
   duration?: string;
+  apiLesson?: ApiLesson;
 }
 
-// Course detail interface
-interface CourseDetail {
-  id: string;
-  title: string;
-  author: string;
-  description: string;
-  lessons: Lesson[];
-  image: any;
-  totalLessons: number;
-  category: string;
-}
-
-// Extended course data with detailed information
-const detailedCourseData: { [key: string]: CourseDetail } = {
-  "1": {
-    id: "1",
-    title: "Python Basics",
+// Map API course to local course format
+const mapApiCourseToLocal = (apiCourse: Course, apiLessons: ApiLesson[]): any => {
+  return {
+    id: apiCourse.id.toString(),
+    title: apiCourse.title,
     author: "Tubeguruji",
-    description:
-      "Python is a general-purpose, high-level programming language. Its design philosophy emphasizes code readability with its notable use of significant whitespace.",
-    totalLessons: 15,
-    category: "basic",
+    description: apiCourse.description,
+    totalLessons: apiLessons.length,
+    category: apiCourse.category.toLowerCase(),
     image: require("@/assets/images/home/course-detail-hero.png"),
-    lessons: [
-      { id: "1", title: "Introduction", number: "01" },
-      { id: "2", title: "Variables", number: "02" },
-      { id: "3", title: "Data Types", number: "03" },
-      { id: "4", title: "Numbers", number: "04" },
-      { id: "5", title: "Casting", number: "05" },
-    ],
-  },
-  "2": {
-    id: "2",
-    title: "React Basics",
-    author: "Tubeguruji",
-    description:
-      "React is a JavaScript library for building user interfaces. It lets you compose complex UIs from small and isolated pieces of code called components.",
-    totalLessons: 15,
-    category: "basic",
-    image: require("@/assets/images/home/course-react.png"),
-    lessons: [
-      { id: "1", title: "Getting Started", number: "01" },
-      { id: "2", title: "Components", number: "02" },
-      { id: "3", title: "Props", number: "03" },
-      { id: "4", title: "State", number: "04" },
-      { id: "5", title: "Hooks", number: "05" },
-    ],
-  },
-  "3": {
-    id: "3",
-    title: "React Native",
-    author: "Tubeguruji",
-    description:
-      "React Native is a framework for building mobile applications using React. Learn to build beautiful, native mobile apps using your existing JavaScript knowledge.",
-    totalLessons: 15,
-    category: "basic",
-    image: require("@/assets/images/home/course-python.png"),
-    lessons: [
-      { id: "1", title: "Setup & Installation", number: "01" },
-      { id: "2", title: "Core Components", number: "02" },
-      { id: "3", title: "Navigation", number: "03" },
-      { id: "4", title: "Styling", number: "04" },
-      { id: "5", title: "API Integration", number: "05" },
-    ],
-  },
-  "4": {
-    id: "4",
-    title: "MySQL",
-    author: "Tubeguruji",
-    description:
-      "MySQL is a popular relational database management system. Learn how to design, create, and manage databases effectively for your applications.",
-    totalLessons: 15,
-    category: "basic",
-    image: require("@/assets/images/home/course-react.png"),
-    lessons: [
-      { id: "1", title: "Database Basics", number: "01" },
-      { id: "2", title: "Creating Tables", number: "02" },
-      { id: "3", title: "SQL Queries", number: "03" },
-      { id: "4", title: "Joins", number: "04" },
-      { id: "5", title: "Optimization", number: "05" },
-    ],
-  },
+    lessons: apiLessons.map((lesson, index) => ({
+      id: lesson.id.toString(),
+      title: lesson.title,
+      number: (index + 1).toString().padStart(2, '0'),
+      duration: lesson.duration,
+      apiLesson: lesson
+    }))
+  };
 };
 
 // Lesson Item Component
@@ -141,9 +80,44 @@ export default function CourseDetails() {
   const router = useRouter();
   const { courseId } = useLocalSearchParams<{ courseId: string }>();
   const [completedLessons, setCompletedLessons] = useState<Set<string>>(new Set());
+  const [courseDetail, setCourseDetail] = useState<any>(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
-  // Get course details based on courseId
-  const courseDetail = courseId ? detailedCourseData[courseId] : null;
+  // Fetch course details from API
+  const fetchCourseDetails = useCallback(async () => {
+    if (!courseId) return;
+    
+    try {
+      setLoading(true);
+      setError(null);
+      
+      // Try to fetch from API first
+      const [apiCourse, apiLessons] = await Promise.all([
+        courseService.getCourseById(courseId),
+        courseService.getCourseLessons(courseId)
+      ]);
+      
+      const mappedCourse = mapApiCourseToLocal(apiCourse, apiLessons);
+      setCourseDetail(mappedCourse);
+      
+    } catch (err) {
+      console.warn('API fetch failed, using mock data:', err);
+      // Fallback to mock data
+      const mockCourses = courseService.getMockCourses();
+      const mockCourse = mockCourses.find(c => c.id.toString() === courseId);
+      
+      if (mockCourse) {
+        const mockLessons = courseService.getMockLessons(mockCourse.id);
+        const mappedCourse = mapApiCourseToLocal(mockCourse, mockLessons);
+        setCourseDetail(mappedCourse);
+      } else {
+        setError('Course not found');
+      }
+    } finally {
+      setLoading(false);
+    }
+  }, [courseId]);
 
   // Load completed lessons on component mount and when returning from lesson
   const loadCompletedLessons = useCallback(async () => {
@@ -167,12 +141,13 @@ export default function CourseDetails() {
     }
   }, [courseId]);
 
-  // Load completions on mount
+  // Load course details and completions on mount
   useEffect(() => {
+    fetchCourseDetails();
     loadCompletedLessons();
-  }, [loadCompletedLessons]);
+  }, [fetchCourseDetails, loadCompletedLessons]);
 
-  // Reload completions when screen comes into focus
+  // Reload when screen comes into focus
   useFocusEffect(
     useCallback(() => {
       loadCompletedLessons();
@@ -192,6 +167,38 @@ export default function CourseDetails() {
     console.log("Play lesson:", lessonId);
     router.push(`/pages/LessonContent?courseId=${courseId}&lessonId=${lessonId}`);
   };
+
+  if (loading) {
+    return (
+      <>
+        <Stack.Screen options={{ headerShown: false }} />
+        <SafeAreaView style={styles.container}>
+          <View style={styles.loadingContainer}>
+            <ThemedText style={styles.loadingText}>Loading course...</ThemedText>
+          </View>
+        </SafeAreaView>
+      </>
+    );
+  }
+
+  if (error) {
+    return (
+      <>
+        <Stack.Screen options={{ headerShown: false }} />
+        <SafeAreaView style={styles.container}>
+          <View style={styles.errorContainer}>
+            <ThemedText style={styles.errorText}>{error}</ThemedText>
+            <TouchableOpacity style={styles.retryButton} onPress={fetchCourseDetails}>
+              <ThemedText style={styles.retryButtonText}>Retry</ThemedText>
+            </TouchableOpacity>
+            <TouchableOpacity style={styles.backButton} onPress={handleBack}>
+              <ThemedText style={styles.backButtonText}>Go Back</ThemedText>
+            </TouchableOpacity>
+          </View>
+        </SafeAreaView>
+      </>
+    );
+  }
 
   if (!courseDetail) {
     return (
@@ -255,7 +262,7 @@ export default function CourseDetails() {
         <View style={styles.courseContentSection}>
           <ThemedText style={styles.sectionTitle}>Course Content</ThemedText>
           <View style={styles.lessonsList}>
-            {courseDetail.lessons.map((lesson) => (
+            {courseDetail.lessons.map((lesson: Lesson) => (
               <LessonItem
                 key={lesson.id}
                 lesson={lesson}
@@ -422,6 +429,17 @@ const styles = StyleSheet.create({
     fontWeight: "300",
     color: Colors.light.text,
   },
+  loadingContainer: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+    paddingHorizontal: 30,
+  },
+  loadingText: {
+    fontSize: 18,
+    fontWeight: "600",
+    color: Colors.light.text,
+  },
   errorContainer: {
     flex: 1,
     justifyContent: "center",
@@ -433,6 +451,18 @@ const styles = StyleSheet.create({
     fontWeight: "600",
     color: Colors.light.text,
     marginBottom: 20,
+    textAlign: "center",
+  },
+  retryButton: {
+    backgroundColor: "#F59E0B",
+    paddingHorizontal: 20,
+    paddingVertical: 10,
+    borderRadius: 8,
+    marginBottom: 15,
+  },
+  retryButtonText: {
+    color: "white",
+    fontWeight: "600",
   },
   backButton: {
     backgroundColor: Colors.light.tint,
