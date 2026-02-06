@@ -5,18 +5,18 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useRouter } from "expo-router";
 import React, { useState } from "react";
 import {
-  Alert,
-  Dimensions,
-  Image,
-  KeyboardAvoidingView,
-  Platform,
-  SafeAreaView,
-  ScrollView,
-  StyleSheet,
-  Text,
-  TextInput,
-  TouchableOpacity,
-  View,
+    Alert,
+    Dimensions,
+    Image,
+    KeyboardAvoidingView,
+    Platform,
+    SafeAreaView,
+    ScrollView,
+    StyleSheet,
+    Text,
+    TextInput,
+    TouchableOpacity,
+    View,
 } from "react-native";
 
 const { width, height } = Dimensions.get("window");
@@ -426,18 +426,12 @@ const styles = StyleSheet.create({
     paddingVertical: 16,
     alignItems: "center",
     marginBottom: 24,
-    shadowColor: Colors.light.tint,
-    shadowOffset: {
-      width: 0,
-      height: 4,
-    },
-    shadowOpacity: 0.3,
-    shadowRadius: 8,
+    boxShadow: `0 4px 8px ${Colors.light.tint}4D`,
     elevation: 8,
   },
   loginButtonDisabled: {
     backgroundColor: "#9CA3AF",
-    shadowOpacity: 0.1,
+    boxShadow: "0 4px 8px rgba(0, 0, 0, 0.1)",
   },
   loginButtonText: {
     color: "white",
@@ -479,13 +473,7 @@ const styles = StyleSheet.create({
     borderRadius: 12,
     paddingVertical: 14,
     backgroundColor: "#FFFFFF",
-    shadowColor: "#000",
-    shadowOffset: {
-      width: 0,
-      height: 2,
-    },
-    shadowOpacity: 0.05,
-    shadowRadius: 3,
+    boxShadow: "0 2px 3px rgba(0, 0, 0, 0.05)",
     elevation: 2,
   },
   socialIcon: {

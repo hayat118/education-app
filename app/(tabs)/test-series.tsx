@@ -5,14 +5,14 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useFocusEffect, useRouter } from "expo-router";
 import React, { useCallback, useState } from "react";
 import {
-  Alert,
-  Dimensions,
-  Image,
-  SafeAreaView,
-  ScrollView,
-  StyleSheet,
-  TouchableOpacity,
-  View,
+    Alert,
+    Dimensions,
+    Image,
+    SafeAreaView,
+    ScrollView,
+    StyleSheet,
+    TouchableOpacity,
+    View,
 } from "react-native";
 
 const { width } = Dimensions.get("window");
@@ -350,13 +350,7 @@ const styles = StyleSheet.create({
     backgroundColor: Colors.light.background,
     borderRadius: 16,
     padding: 20,
-    shadowColor: "#000",
-    shadowOffset: {
-      width: 0,
-      height: 4,
-    },
-    shadowOpacity: 0.08,
-    shadowRadius: 8,
+    boxShadow: "0 4px 8px rgba(0, 0, 0, 0.08)",
     elevation: 4,
   },
   statCard: {
@@ -388,13 +382,7 @@ const styles = StyleSheet.create({
     backgroundColor: Colors.light.background,
     borderRadius: 12,
     marginBottom: 16,
-    shadowColor: "#000",
-    shadowOffset: {
-      width: 0,
-      height: 4,
-    },
-    shadowOpacity: 0.08,
-    shadowRadius: 8,
+    boxShadow: "0 4px 8px rgba(0, 0, 0, 0.08)",
     elevation: 4,
     overflow: "hidden",
   },

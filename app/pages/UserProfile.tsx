@@ -422,13 +422,7 @@ const styles = StyleSheet.create({
     borderRadius: 50,
     borderWidth: 4,
     borderColor: Colors.light.background,
-    shadowColor: "#000",
-    shadowOffset: {
-      width: 0,
-      height: 4,
-    },
-    shadowOpacity: 0.15,
-    shadowRadius: 8,
+    boxShadow: "0 4px 8px rgba(0, 0, 0, 0.15)",
     elevation: 8,
   },
   editImageButton: {
@@ -471,13 +465,7 @@ const styles = StyleSheet.create({
     backgroundColor: Colors.light.background,
     borderRadius: 16,
     padding: 20,
-    shadowColor: "#000",
-    shadowOffset: {
-      width: 0,
-      height: 4,
-    },
-    shadowOpacity: 0.08,
-    shadowRadius: 8,
+    boxShadow: "0 4px 8px rgba(0, 0, 0, 0.08)",
     elevation: 4,
   },
   statItem: {
@@ -517,13 +505,7 @@ const styles = StyleSheet.create({
     backgroundColor: Colors.light.background,
     borderRadius: 16,
     overflow: "hidden",
-    shadowColor: "#000",
-    shadowOffset: {
-      width: 0,
-      height: 4,
-    },
-    shadowOpacity: 0.08,
-    shadowRadius: 8,
+    boxShadow: "0 4px 8px rgba(0, 0, 0, 0.08)",
     elevation: 4,
   },
   menuItem: {

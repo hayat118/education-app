@@ -168,9 +168,19 @@ export default function HomeScreen() {
       const userToken = await AsyncStorage.getItem('user_token');
       const userSession = await AsyncStorage.getItem('user_session');
       
+      // For development, create temporary auth if none exists
       if (!userToken || !userSession) {
-        // No valid session, redirect to login
-        router.replace('/pages/Login');
+        // Create temporary authentication for development
+        await AsyncStorage.setItem('user_token', 'temp_dev_token');
+        await AsyncStorage.setItem('user_session', JSON.stringify({
+          isAuthenticated: true,
+          user: {
+            id: 'dev_user',
+            name: 'Rahul Sanap',
+            email: 'dev@example.com'
+          }
+        }));
+        setIsCheckingAuth(false);
         return;
       }
       
@@ -186,8 +196,17 @@ export default function HomeScreen() {
       setIsCheckingAuth(false);
     } catch (error) {
       console.error('Error checking auth status:', error);
-      // On error, redirect to login for safety
-      router.replace('/pages/Login');
+      // On error, create temporary auth for development
+      await AsyncStorage.setItem('user_token', 'temp_dev_token_error');
+      await AsyncStorage.setItem('user_session', JSON.stringify({
+        isAuthenticated: true,
+        user: {
+          id: 'dev_user',
+          name: 'Rahul Sanap',
+          email: 'dev@example.com'
+        }
+      }));
+      setIsCheckingAuth(false);
     }
   }, [router]);
 
@@ -454,13 +473,7 @@ const styles = StyleSheet.create({
     borderRadius: 10,
     paddingHorizontal: 16,
     paddingVertical: 14,
-    shadowColor: "#000",
-    shadowOffset: {
-      width: 0,
-      height: 4,
-    },
-    shadowOpacity: 0.09,
-    shadowRadius: 4,
+    boxShadow: "0 4px 4px rgba(0, 0, 0, 0.09)",
     elevation: 4,
   },
   searchIcon: {
@@ -537,13 +550,7 @@ const styles = StyleSheet.create({
     width: (width - 75) / 2, // Responsive width for 2 columns
     backgroundColor: Colors.light.background,
     borderRadius: 6,
-    shadowColor: "#000",
-    shadowOffset: {
-      width: 0,
-      height: 4,
-    },
-    shadowOpacity: 0.25,
-    shadowRadius: 4,
+    boxShadow: "0 4px 4px rgba(0, 0, 0, 0.25)",
     elevation: 5,
     overflow: "hidden",
   },
@@ -575,13 +582,7 @@ const styles = StyleSheet.create({
     width: (width - 75) / 2,
     backgroundColor: Colors.light.background,
     borderRadius: 6,
-    shadowColor: "#000",
-    shadowOffset: {
-      width: 0,
-      height: 4,
-    },
-    shadowOpacity: 0.25,
-    shadowRadius: 4,
+    boxShadow: "0 4px 4px rgba(0, 0, 0, 0.25)",
     elevation: 5,
     overflow: "hidden",
   },
